@@ -15,7 +15,13 @@ const getUser = (req, res) => {
         res.status(404).send({ message: `Error getting user ${e}` });
       }
     })
-    .catch((e) => res.status(500).send({ message: `Server error ${e}` }));
+    .catch((e) => {
+      if (e.name === "CastError") {
+        res.status(400).send({ message: `Uncorrect data ${e}` });
+      } else {
+        res.status(500).send({ message: `Server error ${e}` });
+      }
+    });
 };
 //создание пользователя
 const createUser = (req, res) => {
@@ -36,10 +42,10 @@ const updateProfile = (req, res) => {
   const { name, about } = req.body;
   User.findByIdAndUpdate(req.user._id, { name, about })
     .then((user) => {
-      if (user) {
-        res.status(200).send(user);
-      } else {
+      if (!user) {
         res.status(404).send({ message: `Error getting user ${e}` });
+      } else {
+        res.status(200).send(user);
       }
     })
     .catch((e) => {
@@ -55,10 +61,10 @@ const updateAvatar = (req, res) => {
   const { avatar } = req.body;
   User.findByIdAndUpdate(req.user._id, { avatar })
     .then((user) => {
-      if (user) {
-        res.status(200).send(user);
-      } else {
+      if (!user) {
         res.status(404).send({ message: `Error getting user ${e}` });
+      } else {
+        res.status(200).send(user);
       }
     })
     .catch((e) => {
