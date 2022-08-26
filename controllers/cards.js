@@ -12,9 +12,13 @@ const createCard = (req, res) => {
   const { name, link } = req.body;
   Card.create({ name, link, owner: req.user._id })
     .then((card) => res.status(201).send(card))
-    .catch((e) =>
-      res.status(500).send({ message: `Error creating user ${e}` })
-    );
+    .catch((e) => {
+      if (e.name === "ValidationError") {
+        res.status(400).send({ message: `Error validating card ${e}` });
+      } else {
+        res.status(500).send({ message: `Server error ${e}` });
+      }
+    });
 };
 //удаление карточек
 const deleteCard = (req, res) => {
@@ -41,10 +45,15 @@ const likeCard = (req, res) =>
     req.params.cardId,
     { $addToSet: { likes: req.user._id } }, // добавить _id в массив, если его там нет
     { new: true }
+    .orFail(() => {
+      const error = new Error(
+        "Card not found"
+      );
+      error.statusCode = 404;
+      throw error;
+    })
       .then((card) => {
-        if (!card) {
-          res.status(404).send({ message: "Card not found" });
-        } else {
+        if (card) {
           res.status(200).send({ card });
         }
       })
@@ -61,10 +70,15 @@ const dislikeCard = (req, res) =>
     req.params.cardId,
     { $pull: { likes: req.user._id } }, // убрать _id из массива
     { new: true }
+    .orFail(() => {
+      const error = new Error(
+        "Card not found"
+      );
+      error.statusCode = 404;
+      throw error;
+    })
       .then((card) => {
-        if (!card) {
-          res.status(404).send({ message: "Card not found" });
-        } else {
+        if (card) {
           res.status(200).send({ card });
         }
       })
