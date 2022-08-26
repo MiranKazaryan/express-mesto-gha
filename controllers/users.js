@@ -9,10 +9,10 @@ const getUsers = (req, res) => {
 const getUser = (req, res) => {
   User.findById(req.params.id)
     .then((user) => {
-      if (user) {
-        res.status(200).send(user);
-      } else {
+      if (!user) {
         res.status(404).send({ message: `Error getting user ${e}` });
+      } else {
+        res.status(200).send(user);
       }
     })
     .catch((e) => {
@@ -43,7 +43,7 @@ const updateProfile = (req, res) => {
   User.findByIdAndUpdate(req.user._id, { name, about })
     .then((user) => {
       if (!user) {
-        res.status(404).send({ message: `Error getting user ${e}` });
+        res.status(404).send({ message: `Error updating user profile data ${e}` });
       } else {
         res.status(200).send(user);
       }
@@ -62,7 +62,7 @@ const updateAvatar = (req, res) => {
   User.findByIdAndUpdate(req.user._id, { avatar })
     .then((user) => {
       if (!user) {
-        res.status(404).send({ message: `Error getting user ${e}` });
+        res.status(404).send({ message: `Error updating user avatar ${e}` });
       } else {
         res.status(200).send(user);
       }
