@@ -40,54 +40,59 @@ const deleteCard = (req, res) => {
     });
 };
 
-const likeCard = (req, res) =>
+const likeCard = (req, res) => {
   Card.findByIdAndUpdate(
     req.params.cardId,
     { $addToSet: { likes: req.user._id } }, // добавить _id в массив, если его там нет
     { new: true }
+  )
     .orFail(() => {
-      const error = new Error(
-        "Card not found"
-      );
+      const error = new Error("Card not found");
       error.statusCode = 404;
       throw error;
     })
-      .then((card) => {
-        if (card) {
-          res.status(200).send({ card });
-        }
-      })
-      .catch((err) => {
-        if (err.name === "ValidationError") {
-          res.status(400).send({ message: "Data isn't correct" });
-        }
+    .then((card) => {
+      console.log(card);
+      if (card) {
+        res.status(200).send({ card });
+      }
+    })
+    .catch((err) => {
+      if (err.name === "ValidationError") {
+        res.status(400).send({ message: "Data isn't correct" });
+      } else if (err.statusCode === 404) {
+        res.status(404).send(err.message);
+      } else {
         res.status(500).send({ message: "Server error" });
-      })
-  );
+      }
+    });
+};
 
-const dislikeCard = (req, res) =>
+const dislikeCard = (req, res) => {
   Card.findByIdAndUpdate(
     req.params.cardId,
     { $pull: { likes: req.user._id } }, // убрать _id из массива
     { new: true }
+  )
     .orFail(() => {
-      const error = new Error(
-        "Card not found"
-      );
+      const error = new Error("Card not found");
       error.statusCode = 404;
       throw error;
     })
-      .then((card) => {
-        if (card) {
-          res.status(200).send({ card });
-        }
-      })
-      .catch((err) => {
-        if (err.name === "ValidationError") {
-          res.status(400).send({ message: "Data isn't correct" });
-        }
+    .then((card) => {
+      if (card) {
+        res.status(200).send({ card });
+      }
+    })
+    .catch((err) => {
+      if (err.name === "ValidationError") {
+        res.status(400).send({ message: "Data isn't correct" });
+      } else if (err.statusCode === 404) {
+        res.status(404).send(err.message);
+      } else {
         res.status(500).send({ message: "Server error" });
-      })
-  );
+      }
+    });
+};
 
 module.exports = { getCards, createCard, deleteCard, likeCard, dislikeCard };

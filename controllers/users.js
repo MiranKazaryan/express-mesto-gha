@@ -9,9 +9,7 @@ const getUsers = (req, res) => {
 const getUser = (req, res) => {
   User.findById(req.params.userId)
     .orFail(() => {
-      const error = new Error(
-        "User with id isn't found"
-      );
+      const error = new Error("User with id isn't found");
       error.statusCode = 404;
       throw error;
     })
@@ -23,6 +21,8 @@ const getUser = (req, res) => {
     .catch((e) => {
       if (e.name === "CastError") {
         res.status(400).send({ message: `Uncorrect data ${e}` });
+      } else if (e.statusCode === 404) {
+        res.status(404).send(e.message);
       } else {
         res.status(500).send({ message: `Server error ${e}` });
       }
@@ -45,7 +45,11 @@ const createUser = (req, res) => {
 //обновление данных профиля
 const updateProfile = (req, res) => {
   const { name, about } = req.body;
-  User.findByIdAndUpdate(req.user._id, { name, about },{ new: true, runValidators: true })
+  User.findByIdAndUpdate(
+    req.user._id,
+    { name, about },
+    { new: true, runValidators: true }
+  )
     .then((user) => {
       if (!user) {
         res
@@ -66,7 +70,11 @@ const updateProfile = (req, res) => {
 //обновление аватара
 const updateAvatar = (req, res) => {
   const { avatar } = req.body;
-  User.findByIdAndUpdate(req.user._id, { avatar },{ new: true, runValidators: true })
+  User.findByIdAndUpdate(
+    req.user._id,
+    { avatar },
+    { new: true, runValidators: true }
+  )
     .then((user) => {
       if (!user) {
         res.status(404).send({ message: `Error updating user avatar ${e}` });
