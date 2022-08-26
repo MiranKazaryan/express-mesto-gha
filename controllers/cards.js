@@ -9,6 +9,7 @@ const getCards = (req, res) => {
 };
 //создание карточки
 const createCard = (req, res) => {
+  console.log(req.user);
   const { name, link } = req.body;
   Card.create({ name, link, owner: req.user._id })
     .then((card) => res.status(201).send(card))
@@ -22,21 +23,24 @@ const createCard = (req, res) => {
 };
 //удаление карточек
 const deleteCard = (req, res) => {
-  console.log(req.params.id);
-  Card.findById(req.params.id)
-    .orFail(() => {
-      throw new Error("Card not found");
-    })
+  Card.findById(req.params.cardId)
     .then((card) => {
       if (!card) {
-        res.status(404).send({ message: `Error getting card ${e}` });
+        res.status(404).send({ message: "Card not found" });
       }
       if (card.owner._id.toString() !== req.user._id) {
-        res.status(401).send("You can delete only your cards");
+        res.status(403).send({ message: "Can't delete this card" });
       }
-      Card.findByIdAndRemove(req.params.id)
-        .then((card) => res.status(200).send(card))
-        .catch((err) => res.status(500).send({ message: "Server error" }));
+      return card.remove().then(() => {
+        res.send({ message: "Card deleted" });
+      });
+    })
+    .catch((err) => {
+      if (err.name === "CastError") {
+        res.status(400).send({ message: "Incorrect date" });
+      } else {
+        res.status(500).send({ message: "Server error" });
+      }
     });
 };
 
@@ -58,10 +62,11 @@ const likeCard = (req, res) => {
       }
     })
     .catch((err) => {
-      if (err.name === "ValidationError") {
+      console.log(err);
+      if (err.name === "ValidationError" || err.name === "CastError") {
         res.status(400).send({ message: "Data isn't correct" });
       } else if (err.statusCode === 404) {
-        res.status(404).send(err.message);
+        res.status(404).send({ message: err.message });
       } else {
         res.status(500).send({ message: "Server error" });
       }
@@ -85,10 +90,10 @@ const dislikeCard = (req, res) => {
       }
     })
     .catch((err) => {
-      if (err.name === "ValidationError") {
+      if (err.name === "ValidationError" || err.name === "CastError") {
         res.status(400).send({ message: "Data isn't correct" });
       } else if (err.statusCode === 404) {
-        res.status(404).send(err.message);
+        res.status(404).send({ message: err.message });
       } else {
         res.status(500).send({ message: "Server error" });
       }

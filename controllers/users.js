@@ -22,7 +22,7 @@ const getUser = (req, res) => {
       if (e.name === "CastError") {
         res.status(400).send({ message: `Uncorrect data ${e}` });
       } else if (e.statusCode === 404) {
-        res.status(404).send(e.message);
+        res.status(404).send({message: e.message});
       } else {
         res.status(500).send({ message: `Server error ${e}` });
       }
