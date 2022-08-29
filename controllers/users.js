@@ -3,7 +3,7 @@ const User = require("../models/user");
 const getUsers = (req, res) => {
   User.find({})
     .then((user) => res.status(200).send(user))
-    .catch((e) => res.status(500).send({ message: `Error finding user ${e}` }));
+    .catch((e) => res.status(500).send({ message: `Error finding user ` }));
 };
 //получение данных о пользователе
 const getUser = (req, res) => {
@@ -20,25 +20,24 @@ const getUser = (req, res) => {
     })
     .catch((e) => {
       if (e.name === "CastError") {
-        res.status(400).send({ message: `Uncorrect data ${e}` });
+        res.status(400).send({ message: `Uncorrect data ` });
       } else if (e.statusCode === 404) {
         res.status(404).send({message: e.message});
       } else {
-        res.status(500).send({ message: `Server error ${e}` });
+        res.status(500).send({ message: `Server error ` });
       }
     });
 };
 //создание пользователя
 const createUser = (req, res) => {
-  console.log(req);
   const { name, about, avatar } = req.body;
   User.create({ name, about, avatar })
     .then((user) => res.status(201).send(user))
     .catch((e) => {
       if (e.name === "ValidationError") {
-        res.status(400).send({ message: `Error validating user ${e}` });
+        res.status(400).send({ message: `Error validating user ` });
       } else {
-        res.status(500).send({ message: `Server error ${e}` });
+        res.status(500).send({ message: `Server error` });
       }
     });
 };
@@ -54,16 +53,16 @@ const updateProfile = (req, res) => {
       if (!user) {
         res
           .status(404)
-          .send({ message: `Error updating user profile data ${e}` });
+          .send({ message: `Error updating user profile data ` });
       } else {
         res.status(200).send(user);
       }
     })
     .catch((e) => {
       if (e.name === "ValidationError") {
-        res.status(400).send({ message: `Error validating profile data ${e}` });
+        res.status(400).send({ message: `Error validating profile data ` });
       } else {
-        res.status(500).send({ message: `Server error ${e}` });
+        res.status(500).send({ message: `Server error` });
       }
     });
 };
@@ -77,16 +76,16 @@ const updateAvatar = (req, res) => {
   )
     .then((user) => {
       if (!user) {
-        res.status(404).send({ message: `Error updating user avatar ${e}` });
+        res.status(404).send({ message: `Error updating user avatar` });
       } else {
         res.status(200).send(user);
       }
     })
     .catch((e) => {
       if (e.name === "ValidationError") {
-        res.status(400).send({ message: `Error validating avatar data ${e}` });
+        res.status(400).send({ message: `Error validating avatar data ` });
       } else {
-        res.status(500).send({ message: `Server error ${e}` });
+        res.status(500).send({ message: `Server error ` });
       }
     });
 };
