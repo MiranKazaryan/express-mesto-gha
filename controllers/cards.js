@@ -1,27 +1,26 @@
 const Card = require('../models/card');
-//получение всех карточек
+// получение всех карточек
 const getCards = (req, res) => {
   Card.find({})
     .then((cards) => res.status(200).send(cards))
-    .catch((e) => {
-      res.status(500).send({ message: 'Error finding cards'});
+    .catch(() => {
+      res.status(500).send({ message: 'Error finding cards' });
     });
 };
-//создание карточки
+// создание карточки
 const createCard = (req, res) => {
-  console.log(req.user);
   const { name, link } = req.body;
   Card.create({ name, link, owner: req.user._id })
     .then((card) => res.status(201).send(card))
     .catch((e) => {
       if (e.name === 'ValidationError') {
-        res.status(400).send({ message: 'Error validating card'});
+        res.status(400).send({ message: 'Error validating card' });
       } else {
         res.status(500).send({ message: 'Server error' });
       }
     });
 };
-//удаление карточек
+// удаление карточек
 const deleteCard = (req, res) => {
   Card.findById(req.params.cardId)
     .then((card) => {
@@ -48,7 +47,7 @@ const likeCard = (req, res) => {
   Card.findByIdAndUpdate(
     req.params.cardId,
     { $addToSet: { likes: req.user._id } }, // добавить _id в массив, если его там нет
-    { new: true }
+    { new: true },
   )
     .orFail(() => {
       const error = new Error('Card not found');
@@ -75,7 +74,7 @@ const dislikeCard = (req, res) => {
   Card.findByIdAndUpdate(
     req.params.cardId,
     { $pull: { likes: req.user._id } }, // убрать _id из массива
-    { new: true }
+    { new: true },
   )
     .orFail(() => {
       const error = new Error('Card not found');
@@ -98,4 +97,6 @@ const dislikeCard = (req, res) => {
     });
 };
 
-module.exports = { getCards, createCard, deleteCard, likeCard, dislikeCard };
+module.exports = {
+  getCards, createCard, deleteCard, likeCard, dislikeCard,
+};
