@@ -30,7 +30,7 @@ const deleteCard = (req, res) => {
         res.status(ERRORS.NOT_FOUND).send({ message: 'Card not found' });
       }
       if (card.owner._id.toString() !== req.user._id) {
-        res.status(403).send({ message: 'Can not delete this card' });
+        res.status(ERRORS.FORBIDDEN).send({ message: 'Can not delete this card' });
       }
       return card.remove().then(() => {
         res.send({ message: 'Card deleted' });
