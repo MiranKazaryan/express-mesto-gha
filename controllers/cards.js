@@ -1,10 +1,12 @@
 const Card = require('../models/card');
+const ERRORS = require('../utils/constants');
+
 // получение всех карточек
 const getCards = (req, res) => {
   Card.find({})
     .then((cards) => res.status(200).send(cards))
     .catch(() => {
-      res.status(500).send({ message: 'Error finding cards' });
+      res.status(ERRORS.INTERNAL_SERVER).send({ message: 'Error finding cards' });
     });
 };
 // создание карточки
@@ -14,9 +16,9 @@ const createCard = (req, res) => {
     .then((card) => res.status(201).send(card))
     .catch((e) => {
       if (e.name === 'ValidationError') {
-        res.status(400).send({ message: 'Error validating card' });
+        res.status(ERRORS.BAD_REQUEST).send({ message: 'Error validating card' });
       } else {
-        res.status(500).send({ message: 'Server error' });
+        res.status(ERRORS.INTERNAL_SERVER).send({ message: 'Server error' });
       }
     });
 };
@@ -25,7 +27,7 @@ const deleteCard = (req, res) => {
   Card.findById(req.params.cardId)
     .then((card) => {
       if (!card) {
-        res.status(404).send({ message: 'Card not found' });
+        res.status(ERRORS.NOT_FOUND).send({ message: 'Card not found' });
       }
       if (card.owner._id.toString() !== req.user._id) {
         res.status(403).send({ message: 'Can not delete this card' });
@@ -36,9 +38,9 @@ const deleteCard = (req, res) => {
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        res.status(400).send({ message: 'Incorrect date' });
+        res.status(ERRORS.BAD_REQUEST).send({ message: 'Incorrect data' });
       } else {
-        res.status(500).send({ message: 'Server error' });
+        res.status(ERRORS.INTERNAL_SERVER).send({ message: 'Server error' });
       }
     });
 };
@@ -51,7 +53,7 @@ const likeCard = (req, res) => {
   )
     .orFail(() => {
       const error = new Error('Card not found');
-      error.statusCode = 404;
+      error.statusCode = ERRORS.NOT_FOUND;
       throw error;
     })
     .then((card) => {
@@ -61,11 +63,11 @@ const likeCard = (req, res) => {
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        res.status(400).send({ message: 'Data is not correct' });
-      } else if (err.statusCode === 404) {
-        res.status(404).send({ message: err.message });
+        res.status(ERRORS.BAD_REQUEST).send({ message: 'Data is not correct' });
+      } else if (err.statusCode === ERRORS.NOT_FOUND) {
+        res.status(ERRORS.NOT_FOUND).send({ message: err.message });
       } else {
-        res.status(500).send({ message: 'Server error' });
+        res.status(ERRORS.INTERNAL_SERVER).send({ message: 'Server error' });
       }
     });
 };
@@ -78,7 +80,7 @@ const dislikeCard = (req, res) => {
   )
     .orFail(() => {
       const error = new Error('Card not found');
-      error.statusCode = 404;
+      error.statusCode = ERRORS.NOT_FOUND;
       throw error;
     })
     .then((card) => {
@@ -88,11 +90,11 @@ const dislikeCard = (req, res) => {
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        res.status(400).send({ message: 'Data is not correct' });
-      } else if (err.statusCode === 404) {
-        res.status(404).send({ message: err.message });
+        res.status(ERRORS.BAD_REQUEST).send({ message: 'Data is not correct' });
+      } else if (err.statusCode === ERRORS.NOT_FOUND) {
+        res.status(ERRORS.NOT_FOUND).send({ message: err.message });
       } else {
-        res.status(500).send({ message: 'Server error' });
+        res.status(ERRORS.INTERNAL_SERVER).send({ message: 'Server error' });
       }
     });
 };
