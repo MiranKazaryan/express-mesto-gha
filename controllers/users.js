@@ -108,7 +108,7 @@ const createUser = (req, res, next) => {
   bcrypt.hash(password, 10).then((hash) => User.create({
     name, about, avatar, email, password: hash,
   }))
-    .then((user) => { res.status(201).send(user); })
+    .then((user) => { res.status(201).send(user.name, user.about, user.avatar, user.email); })
     .catch((e) => {
       if (e.name === 'ValidationError') {
         res.status(ERRORS.BAD_REQUEST).send({ message: 'Error validating user ' });
