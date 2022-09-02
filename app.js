@@ -1,5 +1,6 @@
 const express = require('express');
 const mongoose = require('mongoose');
+const { errors } = require('celebrate');
 const router = require('./routes/index');
 const ERRORS = require('./utils/constants');
 
@@ -11,8 +12,15 @@ app.use(express.json());
 
 app.use(router);
 
-app.use((req, res) => {
+app.use((req, res, next) => {
   res.status(ERRORS.NOT_FOUND).send({ message: 'Страница по указанному маршруту не найдена' });
+  next();
+});
+app.use(errors());
+app.use((err, req, res, next) => {
+  // ...
+  res.status(ERRORS.INTERNAL_SERVER).send({ message: 'Internal server error ' });
+  next();
 });
 
 app.listen(PORT, () => {
