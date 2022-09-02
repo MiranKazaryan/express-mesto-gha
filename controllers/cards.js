@@ -39,7 +39,8 @@ const deleteCard = (req, res, next) => {
       });
     })
     .catch((err) => {
-      console.log(err);
+      console.log('err',err.name);
+      //console.log(err);
       if (err.name === 'CastError' || req.user === undefined) {
         res.status(ERRORS.BAD_REQUEST).send({ message: 'Incorrect data' });
       } else {
@@ -67,6 +68,7 @@ const likeCard = (req, res, next) => {
       }
     })
     .catch((err) => {
+
       if (err.name === 'CastError' || req.user === undefined) {
         res.status(ERRORS.BAD_REQUEST).send({ message: 'Data is not correct' });
       } else if (err.statusCode === ERRORS.NOT_FOUND) {
