@@ -46,6 +46,7 @@ const deleteCard = (req, res, next) => {
 };
 
 const likeCard = (req, res, next) => {
+  console.log(req.params.cardId);
   Card.findByIdAndUpdate(
     req.params.cardId,
     { $addToSet: { likes: req.user._id } }, // добавить _id в массив, если его там нет
@@ -57,6 +58,7 @@ const likeCard = (req, res, next) => {
       throw error;
     })
     .then((card) => {
+      console.log(card);
       if (card) {
         res.status(200).send({ card });
       }

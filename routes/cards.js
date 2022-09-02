@@ -7,9 +7,9 @@ const {
 } = require('../controllers/cards');
 
 cardRouter.get('/', getCards);
-cardRouter.delete('/:cardId', celebrate({ params: Joi.object().keys({ cardId: Joi.string().required().min(24).max(24) }) }), deleteCard);
+cardRouter.delete('/:cardId', auth, celebrate({ params: Joi.object().keys({ cardId: Joi.string().required().min(24).max(24) }) }), deleteCard);
 cardRouter.post('/', auth, celebrate({ body: Joi.object().keys({ name: Joi.string().required().min(2).max(30), link: Joi.string().required().pattern(/(http(s)?:\/\/)?(www\.)?[A-Za-zА-Яа-я0-9-]*\.[A-Za-zА-Яа-я0-9-]{2,8}(\/?[\wа-яА-Я#!:.?+=&%@!_~[\]$'*+,;=()-]*)*/) }) }), createCard);
-cardRouter.put('/:cardId/likes', celebrate({ params: Joi.object().keys({ cardId: Joi.string().required().min(24).max(24) }) }), likeCard);
-cardRouter.delete('/:cardId/likes', celebrate({ params: Joi.object().keys({ cardId: Joi.string().required().min(24).max(24) }) }), dislikeCard);
+cardRouter.put('/:cardId/likes', auth, celebrate({ params: Joi.object().keys({ cardId: Joi.string().required().min(24).max(24) }) }), likeCard);
+cardRouter.delete('/:cardId/likes', auth, celebrate({ params: Joi.object().keys({ cardId: Joi.string().required().min(24).max(24) }) }), dislikeCard);
 
 module.exports = cardRouter;
