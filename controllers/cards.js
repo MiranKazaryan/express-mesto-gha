@@ -24,14 +24,14 @@ const createCard = (req, res, next) => {
 };
 // удаление карточек
 const deleteCard = (req, res, next) => {
-  console.log('req', req.params);
   Card.findById(req.params.cardId)
     .then((card) => {
-      console.log(card);
+      console.log('card', card.owner._id.toString());
       if (!card) {
         return res.status(ERRORS.NOT_FOUND).send({ message: 'Card not found' });
       }
-      if (card.owner._id.toString() !== req.user._id) {
+      if (card.owner._id.toString() !== req.user?._id) {
+        console.log('aaaaaaaaaaaaa');
         return res.status(ERRORS.FORBIDDEN).send({ message: 'Can not delete this card' });
       }
       return card.remove().then(() => {
@@ -39,9 +39,11 @@ const deleteCard = (req, res, next) => {
       });
     })
     .catch((err) => {
-      console.log('err',err.name);
+      console.log('err' , err.name);
       //console.log(err);
-      if (err.name === 'CastError' || req.user === undefined) {
+      if (err.name === 'CastError'){
+        res.status(ERRORS.FORBIDDEN).send({message:'Can not delete this card'})
+      } else if (req.user === undefined) {
         res.status(ERRORS.BAD_REQUEST).send({ message: 'Incorrect data' });
       } else {
         next(err);
@@ -50,7 +52,7 @@ const deleteCard = (req, res, next) => {
 };
 
 const likeCard = (req, res, next) => {
-  console.log(req.params.cardId);
+
   Card.findByIdAndUpdate(
     req.params.cardId,
     { $addToSet: { likes: req.user._id } }, // добавить _id в массив, если его там нет
@@ -80,6 +82,8 @@ const likeCard = (req, res, next) => {
 };
 
 const dislikeCard = (req, res, next) => {
+  console.log(req.params.cardId);
+  console.log(req.user._id);
   Card.findByIdAndUpdate(
     req.params.cardId,
     { $pull: { likes: req.user._id } }, // убрать _id из массива
