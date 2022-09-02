@@ -34,6 +34,11 @@ const userSchema = new mongoose.Schema({
     select: false,
   },
 });
+function deletePasswordFromUser() {
+  const obj = this.toObject();
+  delete obj.password;
+  return obj;
+}
 userSchema.statics.findUserByCredentials = function (email, password) {
   return this.findOne({ email }).select('+password')
     .then((user) => {
@@ -50,5 +55,6 @@ userSchema.statics.findUserByCredentials = function (email, password) {
         });
     });
 };
+userSchema.methods.deletePasswordFromUser = deletePasswordFromUser;
 
 module.exports = mongoose.model('user', userSchema);
