@@ -2,15 +2,15 @@ const Card = require('../models/card');
 const ERRORS = require('../utils/constants');
 
 // получение всех карточек
-const getCards = (req, res) => {
+const getCards = (req, res, next) => {
   Card.find({})
     .then((cards) => res.status(200).send(cards))
-    .catch(() => {
-      res.status(ERRORS.INTERNAL_SERVER).send({ message: 'Error finding cards' });
+    .catch((e) => {
+      next(e);
     });
 };
 // создание карточки
-const createCard = (req, res) => {
+const createCard = (req, res, next) => {
   const { name, link } = req.body;
   Card.create({ name, link, owner: req.user._id })
     .then((card) => res.status(201).send(card))
@@ -18,12 +18,12 @@ const createCard = (req, res) => {
       if (e.name === 'ValidationError') {
         res.status(ERRORS.BAD_REQUEST).send({ message: 'Error validating card' });
       } else {
-        res.status(ERRORS.INTERNAL_SERVER).send({ message: 'Server error' });
+        next(e);
       }
     });
 };
 // удаление карточек
-const deleteCard = (req, res) => {
+const deleteCard = (req, res, next) => {
   Card.findById(req.params.cardId)
     .then((card) => {
       if (!card) {
@@ -40,12 +40,12 @@ const deleteCard = (req, res) => {
       if (err.name === 'CastError') {
         res.status(ERRORS.BAD_REQUEST).send({ message: 'Incorrect data' });
       } else {
-        res.status(ERRORS.INTERNAL_SERVER).send({ message: 'Server error' });
+        next(err);
       }
     });
 };
 
-const likeCard = (req, res) => {
+const likeCard = (req, res, next) => {
   Card.findByIdAndUpdate(
     req.params.cardId,
     { $addToSet: { likes: req.user._id } }, // добавить _id в массив, если его там нет
@@ -67,12 +67,12 @@ const likeCard = (req, res) => {
       } else if (err.statusCode === ERRORS.NOT_FOUND) {
         res.status(ERRORS.NOT_FOUND).send({ message: err.message });
       } else {
-        res.status(ERRORS.INTERNAL_SERVER).send({ message: 'Server error' });
+        next(err);
       }
     });
 };
 
-const dislikeCard = (req, res) => {
+const dislikeCard = (req, res, next) => {
   Card.findByIdAndUpdate(
     req.params.cardId,
     { $pull: { likes: req.user._id } }, // убрать _id из массива
@@ -94,7 +94,7 @@ const dislikeCard = (req, res) => {
       } else if (err.statusCode === ERRORS.NOT_FOUND) {
         res.status(ERRORS.NOT_FOUND).send({ message: err.message });
       } else {
-        res.status(ERRORS.INTERNAL_SERVER).send({ message: 'Server error' });
+        next(err);
       }
     });
 };
