@@ -24,7 +24,7 @@ const createCard = (req, res, next) => {
 };
 // удаление карточек
 const deleteCard = (req, res, next) => {
-  console.log('req',req.params);
+  console.log('req', req.params);
   Card.findById(req.params.cardId)
     .then((card) => {
       console.log(card);
@@ -39,7 +39,8 @@ const deleteCard = (req, res, next) => {
       });
     })
     .catch((err) => {
-      if (err.name === 'CastError') {
+      console.log(err);
+      if (err.name === 'CastError' || req.user === undefined) {
         res.status(ERRORS.BAD_REQUEST).send({ message: 'Incorrect data' });
       } else {
         next(err);
@@ -66,7 +67,7 @@ const likeCard = (req, res, next) => {
       }
     })
     .catch((err) => {
-      if (err.name === 'CastError') {
+      if (err.name === 'CastError' || req.user === undefined) {
         res.status(ERRORS.BAD_REQUEST).send({ message: 'Data is not correct' });
       } else if (err.statusCode === ERRORS.NOT_FOUND) {
         res.status(ERRORS.NOT_FOUND).send({ message: err.message });
@@ -93,7 +94,7 @@ const dislikeCard = (req, res, next) => {
       }
     })
     .catch((err) => {
-      if (err.name === 'CastError') {
+      if (err.name === 'CastError' || req.user === undefined) {
         res.status(ERRORS.BAD_REQUEST).send({ message: 'Data is not correct' });
       } else if (err.statusCode === ERRORS.NOT_FOUND) {
         res.status(ERRORS.NOT_FOUND).send({ message: err.message });
