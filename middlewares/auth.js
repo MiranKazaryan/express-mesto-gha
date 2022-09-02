@@ -4,7 +4,7 @@ const SECRET_KEY = 'super-strong-secret';
 
 module.exports = (req, res, next) => {
   // тут будет вся авторизация
-  console.log(req.headers);
+ // console.log(req.headers);
   const { authorization } = req.headers;
   console.log(authorization);
   if (!authorization) {
@@ -19,6 +19,6 @@ module.exports = (req, res, next) => {
     return res.status(401).send({ message: 'Need authorization' });
   }
   req.user = payload;
-  console.log(req.user);
+  console.log('user', req.user);
   next();
 };

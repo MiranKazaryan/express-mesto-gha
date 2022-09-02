@@ -24,13 +24,15 @@ const createCard = (req, res, next) => {
 };
 // удаление карточек
 const deleteCard = (req, res, next) => {
+  console.log('req',req.params);
   Card.findById(req.params.cardId)
     .then((card) => {
+      console.log(card);
       if (!card) {
-        res.status(ERRORS.NOT_FOUND).send({ message: 'Card not found' });
+        return res.status(ERRORS.NOT_FOUND).send({ message: 'Card not found' });
       }
       if (card.owner._id.toString() !== req.user._id) {
-        res.status(ERRORS.FORBIDDEN).send({ message: 'Can not delete this card' });
+        return res.status(ERRORS.FORBIDDEN).send({ message: 'Can not delete this card' });
       }
       return card.remove().then(() => {
         res.send({ message: 'Card deleted' });
