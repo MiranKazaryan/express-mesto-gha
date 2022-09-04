@@ -34,7 +34,8 @@ const getUser = (req, res, next) => {
       }
     });
 };
-const getUserInfo = (req, res) =>{
+const getUserInfo = (req, res) => {
+  console.log('reqget', req.user)
   User.findById(req.user._id)
     .orFail(() => {
       const error = new Error('User is not found');
@@ -123,7 +124,10 @@ const login = (req, res) => {
   const { email, password } = req.body;
   return User.findUserByCredentials(email, password)
     .then((user) => {
-      res.send({ token: jwt.sign({ _id: user._id }, SECRET_KEY, { expiresIn: '7d' }) });
+      console.log('user', user);
+      const token = jwt.sign({ _id: user._id }, 'super-strong-secret', { expiresIn: '7d' });
+      console.log('token', token);
+      res.send({ token });
     })
     .catch((err) => {
       res

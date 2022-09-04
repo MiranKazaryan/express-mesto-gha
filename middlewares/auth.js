@@ -4,21 +4,21 @@ const SECRET_KEY = 'super-strong-secret';
 
 module.exports = (req, res, next) => {
   // тут будет вся авторизация
- // console.log(req.headers);
+  console.log('sasdadasdas', req.headers);
   const { authorization } = req.headers;
   console.log(authorization);
-  if (!authorization) {
+  if (!authorization || !authorization.startsWith('Bearer ')) {
     return res.status(401).send({ message: 'Need authorization' });
   }
-  const token = authorization.replace('Bearer', '');
-  console.log('da', token);
+  const token = authorization.replace('Bearer ', '');
+  console.log(token);
   let payload;
   try {
-    payload = jwt.verify(token, SECRET_KEY);
+    payload = jwt.verify(token, 'super-strong-secret');
   } catch (err) {
     return res.status(401).send({ message: 'Need authorization' });
   }
   req.user = payload;
-  console.log('user', req.user);
+  console.log('userauth', req.user);
   next();
 };
