@@ -27,11 +27,6 @@ const createCard = (req, res, next) => {
 // удаление карточек
 const deleteCard = (req, res, next) => {
   Card.findById(req.params.cardId)
-    .orFail(() => {
-      const error = new Error('Card not found');
-      error.statusCode = ERRORS.NOT_FOUND;
-      throw error;
-    })
     .then((card) => {
       if (!card) {
         return res.status(ERRORS.NOT_FOUND).send({ message: 'Card not found' });
