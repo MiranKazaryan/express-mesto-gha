@@ -16,7 +16,9 @@ const createCard = (req, res, next) => {
     .then((card) => res.status(201).send(card))
     .catch((e) => {
       if (e.name === 'ValidationError') {
-        res.status(ERRORS.BAD_REQUEST).send({ message: 'Error validating card' });
+        res
+          .status(ERRORS.BAD_REQUEST)
+          .send({ message: 'Error validating card' });
       } else {
         next(e);
       }
@@ -25,24 +27,29 @@ const createCard = (req, res, next) => {
 // удаление карточек
 const deleteCard = (req, res, next) => {
   Card.findById(req.params.cardId)
+    .orFail(() => {
+      const error = new Error('Card not found');
+      error.statusCode = ERRORS.NOT_FOUND;
+      throw error;
+    })
     .then((card) => {
-      console.log('card', card.owner._id.toString());
       if (!card) {
         return res.status(ERRORS.NOT_FOUND).send({ message: 'Card not found' });
       }
-      if (card.owner._id.toString() !== req.user?._id) {
-        console.log('aaaaaaaaaaaaa');
-        return res.status(ERRORS.FORBIDDEN).send({ message: 'Can not delete this card' });
+      if (card.owner._id.toString() !== req.user._id) {
+        return res
+          .status(ERRORS.FORBIDDEN)
+          .send({ message: 'Can not delete this card' });
       }
       return card.remove().then(() => {
         res.send({ message: 'Card deleted' });
       });
     })
     .catch((err) => {
-      console.log('err' , err.name);
-      //console.log(err);
-      if (err.name === 'CastError'){
-        res.status(ERRORS.FORBIDDEN).send({message:'Can not delete this card'})
+      if (err.name === 'CastError') {
+        res
+          .status(ERRORS.FORBIDDEN)
+          .send({ message: 'Can not delete this card' });
       } else if (req.user === undefined) {
         res.status(ERRORS.BAD_REQUEST).send({ message: 'Incorrect data' });
       } else {
@@ -52,7 +59,6 @@ const deleteCard = (req, res, next) => {
 };
 
 const likeCard = (req, res, next) => {
-
   Card.findByIdAndUpdate(
     req.params.cardId,
     { $addToSet: { likes: req.user._id } }, // добавить _id в массив, если его там нет
@@ -64,13 +70,11 @@ const likeCard = (req, res, next) => {
       throw error;
     })
     .then((card) => {
-      console.log(card);
       if (card) {
         res.status(200).send({ card });
       }
     })
     .catch((err) => {
-
       if (err.name === 'CastError' || req.user === undefined) {
         res.status(ERRORS.BAD_REQUEST).send({ message: 'Data is not correct' });
       } else if (err.statusCode === ERRORS.NOT_FOUND) {
@@ -82,8 +86,6 @@ const likeCard = (req, res, next) => {
 };
 
 const dislikeCard = (req, res, next) => {
-  console.log(req.params.cardId);
-  console.log(req.user._id);
   Card.findByIdAndUpdate(
     req.params.cardId,
     { $pull: { likes: req.user._id } }, // убрать _id из массива
@@ -111,5 +113,9 @@ const dislikeCard = (req, res, next) => {
 };
 
 module.exports = {
-  getCards, createCard, deleteCard, likeCard, dislikeCard,
+  getCards,
+  createCard,
+  deleteCard,
+  likeCard,
+  dislikeCard,
 };

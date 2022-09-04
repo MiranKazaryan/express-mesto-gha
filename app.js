@@ -13,14 +13,16 @@ app.use(express.json());
 app.use(router);
 
 app.use((req, res, next) => {
-  res.status(ERRORS.NOT_FOUND).send({ message: 'Страница по указанному маршруту не найдена' });
+  res
+    .status(ERRORS.NOT_FOUND)
+    .send({ message: 'Страница по указанному маршруту не найдена' });
   next();
 });
 app.use(errors());
 app.use((err, req, res, next) => {
-  // ...
-  console.log('err', err);
-  res.status(ERRORS.INTERNAL_SERVER).send({ message: 'Internal server error ' });
+  res
+    .status(ERRORS.INTERNAL_SERVER)
+    .send({ message: 'Internal server error ' });
   next();
 });
 

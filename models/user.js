@@ -16,7 +16,8 @@ const userSchema = new mongoose.Schema({
     maxlength: 30,
   },
   avatar: {
-    default: 'https://pictures.s3.yandex.net/resources/jacques-cousteau_1604399756.png',
+    default:
+      'https://pictures.s3.yandex.net/resources/jacques-cousteau_1604399756.png',
     type: String,
   },
   email: {
@@ -40,19 +41,18 @@ function deletePasswordFromUser() {
   return obj;
 }
 userSchema.statics.findUserByCredentials = function (email, password) {
-  return this.findOne({ email }).select('+password')
+  return this.findOne({ email })
+    .select('+password')
     .then((user) => {
       if (!user) {
         return Promise.reject(new Error('Неправильные почта или пароль'));
       }
-      return bcrypt.compare(password, user.password)
-        .then((matched) => {
-          if (!matched) {
-            return Promise.reject(new Error('Неправильные почта или пароль'));
-          }
-          console.log(user);
-          return user; // теперь user доступен
-        });
+      return bcrypt.compare(password, user.password).then((matched) => {
+        if (!matched) {
+          return Promise.reject(new Error('Неправильные почта или пароль'));
+        }
+        return user; // теперь user доступен
+      });
     });
 };
 userSchema.methods.deletePasswordFromUser = deletePasswordFromUser;
