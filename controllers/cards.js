@@ -1,5 +1,7 @@
 const Card = require('../models/card');
-const ERRORS = require('../utils/constants');
+const BAD_REQUEST = require('../errors/BadRequesError');
+const NOT_FOUND = require('../errors/BadRequesError');
+const FORBIDDEN = require('../errors/ForbiddenError');
 
 // получение всех карточек
 const getCards = (req, res, next) => {
@@ -16,9 +18,7 @@ const createCard = (req, res, next) => {
     .then((card) => res.status(201).send(card))
     .catch((e) => {
       if (e.name === 'ValidationError') {
-        res
-          .status(ERRORS.BAD_REQUEST)
-          .send({ message: 'Error validating card' });
+        next(new BAD_REQUEST('Error validating card'));
       } else {
         next(e);
       }
@@ -29,12 +29,10 @@ const deleteCard = (req, res, next) => {
   Card.findById(req.params.cardId)
     .then((card) => {
       if (!card) {
-        return res.status(ERRORS.NOT_FOUND).send({ message: 'Card not found' });
+        throw new NOT_FOUND('Card not found');
       }
       if (card.owner._id.toString() !== req.user._id) {
-        return res
-          .status(ERRORS.FORBIDDEN)
-          .send({ message: 'Can not delete this card' });
+        throw new FORBIDDEN('Can not delete this card');
       }
       return card.remove().then(() => {
         res.send({ message: 'Card deleted' });
@@ -42,11 +40,7 @@ const deleteCard = (req, res, next) => {
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        res
-          .status(ERRORS.FORBIDDEN)
-          .send({ message: 'Can not delete this card' });
-      } else if (req.user === undefined) {
-        res.status(ERRORS.BAD_REQUEST).send({ message: 'Incorrect data' });
+        next(new FORBIDDEN('Can not delete this card'));
       } else {
         next(err);
       }
@@ -60,9 +54,7 @@ const likeCard = (req, res, next) => {
     { new: true },
   )
     .orFail(() => {
-      const error = new Error('Card not found');
-      error.statusCode = ERRORS.NOT_FOUND;
-      throw error;
+      throw new NOT_FOUND('Card not found');
     })
     .then((card) => {
       if (card) {
@@ -70,10 +62,8 @@ const likeCard = (req, res, next) => {
       }
     })
     .catch((err) => {
-      if (err.name === 'CastError' || req.user === undefined) {
-        res.status(ERRORS.BAD_REQUEST).send({ message: 'Data is not correct' });
-      } else if (err.statusCode === ERRORS.NOT_FOUND) {
-        res.status(ERRORS.NOT_FOUND).send({ message: err.message });
+      if (err.name === 'CastError') {
+        next(new BAD_REQUEST('Data is not correct'));
       } else {
         next(err);
       }
@@ -87,9 +77,7 @@ const dislikeCard = (req, res, next) => {
     { new: true },
   )
     .orFail(() => {
-      const error = new Error('Card not found');
-      error.statusCode = ERRORS.NOT_FOUND;
-      throw error;
+      throw new NOT_FOUND('Card not found');
     })
     .then((card) => {
       if (card) {
@@ -97,10 +85,8 @@ const dislikeCard = (req, res, next) => {
       }
     })
     .catch((err) => {
-      if (err.name === 'CastError' || req.user === undefined) {
-        res.status(ERRORS.BAD_REQUEST).send({ message: 'Data is not correct' });
-      } else if (err.statusCode === ERRORS.NOT_FOUND) {
-        res.status(ERRORS.NOT_FOUND).send({ message: err.message });
+      if (err.name === 'CastError') {
+        next(new BAD_REQUEST('Data is not correct'));
       } else {
         next(err);
       }

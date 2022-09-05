@@ -1,7 +1,9 @@
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const User = require('../models/user');
-const ERRORS = require('../utils/constants');
+const BAD_REQUEST = require('../errors/BadRequesError');
+const NOT_FOUND = require('../errors/BadRequesError');
+const CONFLICT_ERROR = require('../errors/ConflictError');
 
 const SECRET_KEY = 'super-strong-secret';
 
@@ -15,9 +17,7 @@ const getUsers = (req, res, next) => {
 const getUser = (req, res, next) => {
   User.findById(req.params.userId)
     .orFail(() => {
-      const error = new Error('User with id is not found');
-      error.statusCode = ERRORS.NOT_FOUND;
-      throw error;
+      throw new NOT_FOUND('User with id is not found');
     })
     .then((user) => {
       if (user) {
@@ -26,9 +26,7 @@ const getUser = (req, res, next) => {
     })
     .catch((e) => {
       if (e.name === 'CastError') {
-        res.status(ERRORS.BAD_REQUEST).send({ message: 'Uncorrect data ' });
-      } else if (e.statusCode === ERRORS.NOT_FOUND) {
-        res.status(ERRORS.NOT_FOUND).send({ message: e.message });
+        next(new BAD_REQUEST('Uncorrect data'));
       } else {
         next(e);
       }
@@ -37,9 +35,7 @@ const getUser = (req, res, next) => {
 const getUserInfo = (req, res, next) => {
   User.findById(req.user._id)
     .orFail(() => {
-      const error = new Error('User is not found');
-      error.statusCode = ERRORS.NOT_FOUND;
-      throw error;
+      throw new NOT_FOUND('User is not found');
     })
     .then((user) => {
       if (user) {
@@ -69,19 +65,15 @@ const createUser = (req, res, next) => {
     })
     .catch((e) => {
       if (e.name === 'ValidationError') {
-        res
-          .status(ERRORS.BAD_REQUEST)
-          .send({ message: 'Error validating user ' });
+        next(new BAD_REQUEST('Error validating user'));
       } else if (e.code === 11000) {
-        res
-          .status(ERRORS.CONFLICT_ERROR)
-          .send({ message: 'This email is already exist' });
+        next(new CONFLICT_ERROR('This email is already exist'));
       } else {
         next(e);
       }
     });
 };
-const login = (req, res) => {
+const login = (req, res, next) => {
   const { email, password } = req.body;
   return User.findUserByCredentials(email, password)
     .then((user) => {
@@ -91,7 +83,7 @@ const login = (req, res) => {
       res.send({ token });
     })
     .catch((err) => {
-      res.status(ERRORS.UNAUTHORIZED).send({ message: err.message });
+      next(err);
     });
 };
 // обновление данных профиля
@@ -104,16 +96,14 @@ const updateProfile = (req, res, next) => {
   )
     .then((user) => {
       if (!user) {
-        res.status(ERRORS.NOT_FOUND).send({ message: 'User is not found ' });
+        throw new NOT_FOUND('User is not found');
       } else {
         res.status(200).send(user);
       }
     })
     .catch((e) => {
       if (e.name === 'ValidationError') {
-        res
-          .status(ERRORS.BAD_REQUEST)
-          .send({ message: 'Error validating profile data ' });
+        next(new BAD_REQUEST('Error validating profile data'));
       } else {
         next(e);
       }
@@ -129,16 +119,14 @@ const updateAvatar = (req, res, next) => {
   )
     .then((user) => {
       if (!user) {
-        res.status(ERRORS.NOT_FOUND).send({ message: 'User is not found' });
+        throw new NOT_FOUND('User is not found');
       } else {
         res.status(200).send(user);
       }
     })
     .catch((e) => {
       if (e.name === 'ValidationError') {
-        res
-          .status(ERRORS.BAD_REQUEST)
-          .send({ message: 'Error validating avatar data ' });
+        next(new BAD_REQUEST('Error validating avatar data'));
       } else {
         next(e);
       }

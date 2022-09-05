@@ -2,7 +2,7 @@ const express = require('express');
 const mongoose = require('mongoose');
 const { errors } = require('celebrate');
 const router = require('./routes/index');
-const ERRORS = require('./utils/constants');
+const INTERNAL_SERVER = require('./errors/InternalServerError');
 
 const { PORT = 3000 } = process.env;
 const app = express();
@@ -12,20 +12,9 @@ app.use(express.json());
 
 app.use(router);
 
-app.use((req, res, next) => {
-  res
-    .status(ERRORS.NOT_FOUND)
-    .send({ message: 'Страница по указанному маршруту не найдена' });
-  next();
-});
 app.use(errors());
-app.use((err, req, res, next) => {
-  res
-    .status(ERRORS.INTERNAL_SERVER)
-    .send({ message: 'Internal server error ' });
-  next();
+app.use(() => {
+  throw new INTERNAL_SERVER('Internal server error');
 });
 
-app.listen(PORT, () => {
-  console.log(`App is running on port ${PORT}`);
-});
+app.listen(PORT);
