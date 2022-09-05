@@ -2,7 +2,7 @@ const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const User = require('../models/user');
 const BAD_REQUEST = require('../errors/BadRequesError');
-const NOT_FOUND = require('../errors/BadRequesError');
+const NOT_FOUND = require('../errors/NotFoundError');
 const CONFLICT_ERROR = require('../errors/ConflictError');
 
 const SECRET_KEY = 'super-strong-secret';

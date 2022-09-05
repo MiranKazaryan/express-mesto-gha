@@ -1,6 +1,6 @@
 const Card = require('../models/card');
 const BAD_REQUEST = require('../errors/BadRequesError');
-const NOT_FOUND = require('../errors/BadRequesError');
+const NOT_FOUND = require('../errors/NotFoundError');
 const FORBIDDEN = require('../errors/ForbiddenError');
 
 // получение всех карточек
@@ -25,6 +25,9 @@ const createCard = (req, res, next) => {
 // удаление карточек
 const deleteCard = (req, res, next) => {
   Card.findById(req.params.cardId)
+    .orFail(() => {
+      throw new NOT_FOUND('Card not found');
+    })
     .then((card) => {
       if (!card) {
         throw new NOT_FOUND('Card not found');
@@ -37,6 +40,7 @@ const deleteCard = (req, res, next) => {
       });
     })
     .catch((err) => {
+      console.log(err);
       if (err.name === 'CastError') {
         next(new FORBIDDEN('Can not delete this card'));
       } else {
