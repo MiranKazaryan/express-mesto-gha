@@ -11,7 +11,7 @@ const SECRET_KEY = 'super-strong-secret';
 const getUsers = (req, res, next) => {
   User.find({})
     .then((user) => res.status(200).send(user))
-    .catch((e) => next(e));
+    .catch(next);
 };
 // получение данных о пользователе
 const getUser = (req, res, next) => {
@@ -42,9 +42,7 @@ const getUserInfo = (req, res, next) => {
         res.status(200).send(user);
       }
     })
-    .catch((e) => {
-      next(e);
-    });
+    .catch(next);
 };
 
 const createUser = (req, res, next) => {
@@ -82,9 +80,7 @@ const login = (req, res, next) => {
       });
       res.send({ token });
     })
-    .catch((err) => {
-      next(err);
-    });
+    .catch(next);
 };
 // обновление данных профиля
 const updateProfile = (req, res, next) => {

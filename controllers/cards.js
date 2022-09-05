@@ -7,9 +7,7 @@ const FORBIDDEN = require('../errors/ForbiddenError');
 const getCards = (req, res, next) => {
   Card.find({})
     .then((cards) => res.status(200).send(cards))
-    .catch((e) => {
-      next(e);
-    });
+    .catch(next);
 };
 // создание карточки
 const createCard = (req, res, next) => {
