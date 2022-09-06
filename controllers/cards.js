@@ -29,9 +29,6 @@ const deleteCard = (req, res, next) => {
       throw new NOT_FOUND('Card not found');
     })
     .then((card) => {
-      if (!card) {
-        throw new NOT_FOUND('Card not found');
-      }
       if (card.owner._id.toString() !== req.user._id) {
         throw new FORBIDDEN('Can not delete this card');
       }
@@ -40,9 +37,8 @@ const deleteCard = (req, res, next) => {
       });
     })
     .catch((err) => {
-      console.log(err);
       if (err.name === 'CastError') {
-        next(new FORBIDDEN('Can not delete this card'));
+        next(new BAD_REQUEST('Data is not correct'));
       } else {
         next(err);
       }
@@ -59,9 +55,7 @@ const likeCard = (req, res, next) => {
       throw new NOT_FOUND('Card not found');
     })
     .then((card) => {
-      if (card) {
-        res.status(200).send({ card });
-      }
+      res.status(200).send({ card });
     })
     .catch((err) => {
       if (err.name === 'CastError') {
@@ -82,9 +76,7 @@ const dislikeCard = (req, res, next) => {
       throw new NOT_FOUND('Card not found');
     })
     .then((card) => {
-      if (card) {
-        res.status(200).send({ card });
-      }
+      res.status(200).send({ card });
     })
     .catch((err) => {
       if (err.name === 'CastError') {

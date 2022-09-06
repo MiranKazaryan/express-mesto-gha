@@ -20,9 +20,7 @@ const getUser = (req, res, next) => {
       throw new NOT_FOUND('User with id is not found');
     })
     .then((user) => {
-      if (user) {
-        res.status(200).send(user);
-      }
+      res.status(200).send(user);
     })
     .catch((e) => {
       if (e.name === 'CastError') {
@@ -32,15 +30,14 @@ const getUser = (req, res, next) => {
       }
     });
 };
+
 const getUserInfo = (req, res, next) => {
   User.findById(req.user._id)
     .orFail(() => {
       throw new NOT_FOUND('User is not found');
     })
     .then((user) => {
-      if (user) {
-        res.status(200).send(user);
-      }
+      res.status(200).send(user);
     })
     .catch(next);
 };
@@ -71,6 +68,7 @@ const createUser = (req, res, next) => {
       }
     });
 };
+
 const login = (req, res, next) => {
   const { email, password } = req.body;
   return User.findUserByCredentials(email, password)
